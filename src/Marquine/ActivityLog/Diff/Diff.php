@@ -112,7 +112,7 @@ class Diff
         $result = [];
 
         foreach ($this->after as $key => $value) {
-            $result[] = [
+            $result[] = (object) [
                 'key' => $key,
                 'value' => $value,
                 'type' => empty($value) ? 'equal' : 'insert',
@@ -137,7 +137,7 @@ class Diff
 
         foreach ($this->after as $key => $value) {
             if ($this->before[$key] == $this->after[$key]) {
-                $result[] = [
+                $result[] = (object) [
                     'key' => $key,
                     'value' => $value,
                     'type' => 'equal',
@@ -148,7 +148,7 @@ class Diff
 
             $diff->setRenderer(new Renderers\Delete);
 
-            $result[] = [
+            $result[] = (object) [
                 'key' => $key,
                 'value' => $diff->render($this->before[$key], $this->after[$key]),
                 'type' => 'delete',
@@ -156,7 +156,7 @@ class Diff
 
             $diff->setRenderer(new Renderers\Insert);
 
-            $result[] = [
+            $result[] = (object) [
                 'key' => $key,
                 'value' => $diff->render($this->before[$key], $this->after[$key]),
                 'type' => 'insert',
@@ -176,7 +176,7 @@ class Diff
         $result = [];
 
         foreach ($before as $key => $value) {
-            $result[] = [
+            $result[] = (object) [
                 'key' => $key,
                 'value' => $value,
                 'type' => empty($value) ? 'equal' : 'delete',
