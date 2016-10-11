@@ -38,18 +38,4 @@ trait ActivityLog
 
         return parent::getCasts();
     }
-
-    /**
-     * Get all of the appendable values that are arrayable.
-     *
-     * @return array
-     */
-    protected function getArrayableAppends()
-    {
-        $this->appends[] = 'diff';
-
-        $this->appends = array_unique($this->appends);
-
-        return parent::getArrayableAppends();
-    }
 }
