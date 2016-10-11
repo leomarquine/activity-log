@@ -2,6 +2,8 @@
 
 namespace Marquine\ActivityLog;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 trait Loggable
 {
     /**
@@ -23,9 +25,11 @@ trait Loggable
             $model->logDeleted();
         });
 
-        static::restored(function ($model) {
-            $model->logRestored();
-        });
+        if (in_array(SoftDeletes::class, class_uses(static::class))) {
+            static::restored(function ($model) {
+                $model->logRestored();
+            });
+        }
     }
 
     /**
@@ -61,7 +65,9 @@ trait Loggable
 
         $before = array_intersect_key($this->getOriginal(), $after);
 
-        $this->log($before, $after, 'updated');
+        if ($before != $after) {
+            $this->log($before, $after, 'updated');
+        }
     }
 
     /**
