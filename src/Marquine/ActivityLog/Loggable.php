@@ -33,11 +33,11 @@ trait Loggable
     }
 
     /**
-     * Get the model's activity.
+     * Get the model's activities.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function activity()
+    public function activities()
     {
         return $this->morphMany(config('activity.model'), 'loggable');
     }
