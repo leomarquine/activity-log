@@ -129,7 +129,7 @@ trait Loggable
         $activity->before = $before;
         $activity->after = $after;
 
-        $this->activity()->save($activity);
+        $this->activities()->save($activity);
     }
 
     /**
