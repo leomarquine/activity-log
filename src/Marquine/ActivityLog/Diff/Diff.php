@@ -2,10 +2,18 @@
 
 namespace Marquine\ActivityLog\Diff;
 
+use InvalidArgumentException;
 use cogpowered\FineDiff\Diff as Differ;
 
 class Diff
 {
+    /**
+     * Model to make the diff.
+     *
+     * @var array
+     */
+    protected $model;
+
     /**
      * The data before the activity.
      *
@@ -21,18 +29,11 @@ class Diff
     protected $after;
 
     /**
-     * Indicates if the output is raw.
+     *  Differ.
      *
-     * @var bool
+     * @var \cogpowered\FineDiff\Diff
      */
-    protected $raw;
-
-    /**
-     * Granularity type.
-     *
-     * @var string
-     */
-    protected $granularity;
+    protected $diff;
 
     /**
      * Create a new Diff instance.
@@ -42,15 +43,13 @@ class Diff
      */
     protected function __construct($activity)
     {
-        $model = new $activity->loggable_type;
+        $this->model = new $activity->loggable_type;
 
-        $this->raw = $this->getConfig($model, 'raw');
+        $this->before = $this->data($activity->before);
 
-        $this->granularity = $this->getConfig($model, 'granularity');
+        $this->after = $this->data($activity->after);
 
-        $this->before = $this->getData($model, (array) $activity->before);
-
-        $this->after = $this->getData($model, (array) $activity->after);
+        $this->differ = new Differ($this->granularity());
     }
 
     /**
@@ -63,35 +62,22 @@ class Diff
     {
         $instance = new static($activity);
 
-        return $instance->{$activity->event}();
-    }
-
-    /**
-     * Get the propper config value.
-     *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
-     * @param  string  $config
-     * @return mixed
-     */
-    protected function getConfig($model, $config)
-    {
-        $property = 'diff'.ucfirst($config);
-
-        return $model->{$property}() !== null
-                    ? $model->{$property}()
-                    : config("activity.diff.$config");
+        return $instance->diff();
     }
 
     /**
      * Get the activity data.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
      * @param  array  $data
      * @return array
      */
-    protected function getData($model, $data)
+    protected function data($data)
     {
-        if (! $this->raw) {
+        $class = get_class($this->model);
+
+        $model = new $class;
+
+        if (! $model->diffRaw()) {
             $model->unguard();
 
             $data = $model->fill($data)->attributesToArray();
@@ -103,107 +89,132 @@ class Diff
     }
 
     /**
-     * Get the diff for the "created" event.
+     * Get diff keys.
      *
      * @return array
      */
-    protected function created()
+    protected function keys()
     {
-        $result = [];
-
-        foreach ($this->after as $key => $value) {
-            $result[] = (object) [
-                'key' => $key,
-                'value' => $value,
-                'type' => empty($value) ? 'equal' : 'insert',
-            ];
+        if (count($this->before) > count($this->after)) {
+            return array_keys($this->before);
         }
 
-        return $result;
+        return array_keys($this->after);
     }
 
     /**
-     * Get the diff for the "updated" event.
+     * Get the diff for the model.
      *
      * @return array
      */
-    protected function updated()
+    protected function diff()
     {
         $result = [];
 
-        $diff = new Differ();
-
-        $diff->setGranularity($this->granularity());
-
-        foreach ($this->after as $key => $value) {
-            if ($this->before[$key] == $this->after[$key]) {
-                $result[] = (object) [
-                    'key' => $key,
-                    'value' => $value,
-                    'type' => 'equal',
-                ];
-
-                continue;
+        foreach ($this->keys() as $key) {
+            if ($diff = $this->equal($key)) {
+                $result[] = $diff; continue;
             }
 
-            $diff->setRenderer(new Renderers\Delete);
+            if ($item = $this->delete($key)) {
+                $result[] = $item;
+            }
 
-            $result[] = (object) [
-                'key' => $key,
-                'value' => $diff->render($this->before[$key], $this->after[$key]),
-                'type' => 'delete',
-            ];
-
-            $diff->setRenderer(new Renderers\Insert);
-
-            $result[] = (object) [
-                'key' => $key,
-                'value' => $diff->render($this->before[$key], $this->after[$key]),
-                'type' => 'insert',
-            ];
+            if ($item = $this->insert($key)) {
+                $result[] = $item;
+            }
         }
 
         return $result;
     }
 
     /**
-     * Get the diff for the "deleted" event.
+     * Get equal attribute object.
      *
-     * @return array
+     * @param  string  $key
+     * @return \stdClass
      */
-    protected function deleted()
+    protected function equal($key)
     {
-        $result = [];
-
-        foreach ($before as $key => $value) {
-            $result[] = (object) [
-                'key' => $key,
-                'value' => $value,
-                'type' => empty($value) ? 'equal' : 'delete',
-            ];
+        if ($this->before[$key] !== $this->after[$key]) {
+            return false;
         }
 
-        return $result;
+        $diff = [
+            'key' => $key,
+            'value' => $this->before[$key],
+            'type' => 'equal',
+        ];
+
+        return (object) $diff;
     }
 
     /**
-     * Get the diff for the "restored" event.
+     * Get delete attribute object.
      *
-     * @return array
+     * @param  string  $key
+     * @return \stdClass
      */
-    protected function restored()
+    protected function delete($key)
     {
-        return $this->created();
+        if ($this->before[$key] === null) {
+            return false;
+        }
+
+        $this->differ->setRenderer(new Renderers\Delete);
+
+        $value = $this->after[$key]
+                    ? $this->differ->render($this->before[$key], $this->after[$key])
+                    : $this->before[$key];
+
+        $diff = [
+            'key' => $key,
+            'value' => $value,
+            'type' => 'delete',
+        ];
+
+        return (object) $diff;
+    }
+
+    /**
+     * Get insert attribute object.
+     *
+     * @param  string  $key
+     * @return \stdClass
+     */
+    protected function insert($key)
+    {
+        if ($this->after[$key] === null) {
+            return false;
+        }
+
+        $this->differ->setRenderer(new Renderers\Insert);
+
+        $value = $this->before[$key]
+                    ? $this->differ->render($this->before[$key], $this->after[$key])
+                    : $this->after[$key];
+
+        $diff = [
+            'key' => $key,
+            'value' => $value,
+            'type' => 'insert',
+        ];
+
+        return (object) $diff;
     }
 
     /**
      * Get the granularity.
      *
      * @return \cogpowered\FineDiff\Granularity\Granularity
+     *
+     * @throws \InvalidArgumentException
      */
     protected function granularity()
     {
-        switch ($this->granularity) {
+        $granularity = $this->model->diffGranularity();
+
+        switch ($granularity) {
             case 'character':
                 return new \cogpowered\FineDiff\Granularity\Character;
             case 'word':
@@ -212,8 +223,8 @@ class Diff
                 return new \cogpowered\FineDiff\Granularity\Sentence;
             case 'paragraph':
                 return new \cogpowered\FineDiff\Granularity\Paragraph;
-            default:
-                return new \cogpowered\FineDiff\Granularity\Word;
         }
+
+        throw new InvalidArgumentException("The '$granularity' granularity is not valid.");
     }
 }

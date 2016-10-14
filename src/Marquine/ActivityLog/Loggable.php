@@ -139,9 +139,11 @@ trait Loggable
      */
     public function diffRaw()
     {
-        return property_exists($this, 'diffRaw')
-                ? $this->diffRaw
-                : null;
+        if (! property_exists($this, 'diffRaw')) {
+            return config('activity.diff.raw');
+        }
+
+        return $this->diffRaw;
     }
 
     /**
@@ -151,8 +153,10 @@ trait Loggable
      */
     public function diffGranularity()
     {
-        return property_exists($this, 'diffGranularity')
-                ? $this->diffGranularity
-                : null;
+        if (! property_exists($this, 'diffGranularity')) {
+            return config('activity.diff.granularity');
+        }
+
+        return $this->diffGranularity;
     }
 }
