@@ -157,7 +157,7 @@ class Diff
      */
     protected function delete($key)
     {
-        if ($this->before[$key] === null) {
+        if ($this->before[$key] === null || $this->before[$key] === '') {
             return false;
         }
 
@@ -184,7 +184,7 @@ class Diff
      */
     protected function insert($key)
     {
-        if ($this->after[$key] === null) {
+        if ($this->after[$key] === null || $this->after[$key] === '') {
             return false;
         }
 
