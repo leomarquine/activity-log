@@ -3,16 +3,24 @@
 namespace Marquine\ActivityLog\Diff;
 
 use InvalidArgumentException;
+use Illuminate\Database\Eloquent\Model;
 use cogpowered\FineDiff\Diff as Differ;
 
 class Diff
 {
     /**
-     * Model to make the diff.
+     * Logged activity.
      *
-     * @var array
+     * @var \Illuminate\Database\Eloquent\Model
      */
-    protected $model;
+    protected $activity;
+
+    /**
+     * Differ.
+     *
+     * @var \cogpowered\FineDiff\Diff
+     */
+    protected $diff;
 
     /**
      * The data before the activity.
@@ -29,25 +37,14 @@ class Diff
     protected $after;
 
     /**
-     *  Differ.
-     *
-     * @var \cogpowered\FineDiff\Diff
-     */
-    protected $diff;
-
-    /**
      * Create a new Diff instance.
      *
      * @param  \Illuminate\Database\Eloquent\Model  $activity
      * @return void
      */
-    protected function __construct($activity)
+    protected function __construct(Model $activity)
     {
-        $this->model = new $activity->loggable_type;
-
-        $this->before = $this->data($activity->before);
-
-        $this->after = $this->data($activity->after);
+        $this->activity = $activity;
 
         $this->differ = new Differ($this->granularity());
     }
@@ -73,9 +70,9 @@ class Diff
      */
     protected function data($data)
     {
-        $class = get_class($this->model);
+        $model = new $this->activity->loggable_type;
 
-        $model = new $class;
+        $data = (array) $data;
 
         if (! $model->diffRaw()) {
             $model->unguard();
@@ -89,17 +86,63 @@ class Diff
     }
 
     /**
+     * Get the data before the activity.
+     *
+     * @param  string|null  $key
+     * @return mixed
+     */
+    protected function before($key = null)
+    {
+        if (! $this->before) {
+            $this->before = $this->data($this->activity->before);
+        }
+
+        if (! $key) {
+            return array_keys($this->before);
+        }
+
+        if (! isset($this->before[$key]) || $this->before[$key] === '') {
+            return null;
+        }
+
+        return $this->before[$key];
+    }
+
+    /**
+     * Get the data after the activity.
+     *
+     * @param  string|null  $key
+     * @return mixed
+     */
+    protected function after($key = null)
+    {
+        if (! $this->after) {
+            $this->after = $this->data($this->activity->after);
+        }
+
+        if (! $key) {
+            return array_keys($this->after);
+        }
+
+        if (! isset($this->after[$key]) || $this->after[$key] === '') {
+            return null;
+        }
+
+        return $this->after[$key];
+    }
+
+    /**
      * Get diff keys.
      *
      * @return array
      */
     protected function keys()
     {
-        if (count($this->before) > count($this->after)) {
-            return array_keys($this->before);
+        if (count($this->before()) > count($this->after())) {
+            return $this->before();
         }
 
-        return array_keys($this->after);
+        return $this->after();
     }
 
     /**
@@ -136,13 +179,13 @@ class Diff
      */
     protected function equal($key)
     {
-        if ($this->before[$key] !== $this->after[$key]) {
+        if ($this->before($key) !== $this->after($key)) {
             return false;
         }
 
         $diff = [
             'key' => $key,
-            'value' => $this->before[$key],
+            'value' => $this->before($key),
             'type' => 'equal',
         ];
 
@@ -157,15 +200,15 @@ class Diff
      */
     protected function delete($key)
     {
-        if ($this->before[$key] === null || $this->before[$key] === '') {
+        if ($this->before($key) === null || $this->before($key) === '') {
             return false;
         }
 
         $this->differ->setRenderer(new Renderers\Delete);
 
-        $value = $this->after[$key]
-                    ? $this->differ->render($this->before[$key], $this->after[$key])
-                    : $this->before[$key];
+        $value = $this->after($key)
+                    ? $this->differ->render($this->before($key), $this->after($key))
+                    : $this->before($key);
 
         $diff = [
             'key' => $key,
@@ -184,15 +227,15 @@ class Diff
      */
     protected function insert($key)
     {
-        if ($this->after[$key] === null || $this->after[$key] === '') {
+        if ($this->after($key) === null || $this->after($key) === '') {
             return false;
         }
 
         $this->differ->setRenderer(new Renderers\Insert);
 
-        $value = $this->before[$key]
-                    ? $this->differ->render($this->before[$key], $this->after[$key])
-                    : $this->after[$key];
+        $value = $this->before($key)
+                    ? $this->differ->render($this->before($key), $this->after($key))
+                    : $this->after($key);
 
         $diff = [
             'key' => $key,
@@ -212,7 +255,9 @@ class Diff
      */
     protected function granularity()
     {
-        $granularity = $this->model->diffGranularity();
+        $model = new $this->activity->loggable_type;
+
+        $granularity = $model->diffGranularity();
 
         switch ($granularity) {
             case 'character':
