@@ -177,12 +177,12 @@ class Diff
                 $result[] = $diff; continue;
             }
 
-            if ($item = $this->delete($key)) {
-                $result[] = $item;
+            if ($diff = $this->delete($key)) {
+                $result[] = $diff;
             }
 
-            if ($item = $this->insert($key)) {
-                $result[] = $item;
+            if ($diff = $this->insert($key)) {
+                $result[] = $diff;
             }
         }
 
