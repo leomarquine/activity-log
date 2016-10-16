@@ -30,6 +30,7 @@ return [
     'diff' => [
         'raw' => true,
         'granularity' => 'word'
+        'hidden' => false,
     ],
 
     /*

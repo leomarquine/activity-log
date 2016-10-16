@@ -82,7 +82,25 @@ class Diff
             $model->reguard();
         }
 
+        if (! config('activity.diff.hidden')) {
+            $data = $this->removeHiddenAttributes($model, $data);
+        }
+
         return $data;
+    }
+
+    /**
+     * Remove model's hidden attributes.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  array  $data
+     * @return array
+     */
+    protected function removeHiddenAttributes($model, $data)
+    {
+        $hidden = $model->getHidden();
+
+        return array_diff_key($data, array_flip($hidden));
     }
 
     /**
