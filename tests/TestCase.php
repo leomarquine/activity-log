@@ -43,7 +43,8 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
         Capsule::schema()->create('users', function($table) {
             $table->increments('id');
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email');
+            $table->softDeletes();
             $table->timestamps();
         });
 
@@ -61,5 +62,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 }
 
 class User extends \Illuminate\Database\Eloquent\Model {
+    use \Illuminate\Database\Eloquent\SoftDeletes;
+
     protected $fillable = ['email', 'name'];
 }
