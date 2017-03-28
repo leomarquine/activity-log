@@ -4,7 +4,7 @@ namespace Marquine\Chronos;
 
 use Marquine\Chronos\Diff\Diff;
 
-trait ActivityLog
+trait LogActivities
 {
     /**
      * Get all of the owning loggable models.
