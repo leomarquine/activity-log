@@ -2,6 +2,8 @@
 
 return [
 
-    'model' => Marquine\Chornos\Activity::class,
+    'model' => Marquine\Chronos\Activity::class,
+
+    'ignore' => ['id', 'created_at', 'updated_at', 'deleted_at'],
 
 ];

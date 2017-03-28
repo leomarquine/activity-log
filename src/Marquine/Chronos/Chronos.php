@@ -123,11 +123,7 @@ class Chronos
      */
     protected function loggableAttributes($model, $attributes)
     {
-        if (array_key_exists($model, $this->config['loggable']) && array_key_exists('except', $this->config['loggable'][$model])) {
-            $except = array_flip($this->config['loggable'][$model]['except']);
-        } else {
-            $except = array_flip($this->config['except']);
-        }
+        $except = array_flip($this->config['ignore']);
 
         return array_diff_key($attributes, $except);
     }
