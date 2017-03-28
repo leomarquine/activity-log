@@ -1,6 +1,6 @@
 <?php
 
-namespace Marquine\ActivityLog;
+namespace Marquine\Chronos;
 
 use Illuminate\Support\Arr;
 use Illuminate\Contracts\Auth\Factory as Auth;
