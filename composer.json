@@ -20,5 +20,11 @@
         "psr-4": {
             "Marquine\\Chronos\\": "src/Marquine/Chronos/"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~5.7"
+    },
+    "autoload-dev": {
+        "classmap": ["tests"]
     }
 }
