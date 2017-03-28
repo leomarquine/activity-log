@@ -1,10 +1,10 @@
 <?php
 
-namespace Marquine\ActivityLog;
+namespace Marquine\Chronos;
 
 use Illuminate\Support\ServiceProvider;
 
-class ActivityLogServiceProvider extends ServiceProvider
+class ChronosServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.

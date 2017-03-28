@@ -1,8 +1,8 @@
 <?php
 
-namespace Marquine\ActivityLog;
+namespace Marquine\Chronos;
 
-use Marquine\ActivityLog\Diff\Diff;
+use Marquine\Chronos\Diff\Diff;
 
 trait ActivityLog
 {

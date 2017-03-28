@@ -1,5 +1,5 @@
 {
-    "name": "marquine/activity-log",
+    "name": "marquine/chronos",
     "description": "Activity Log for Laravel Eloquent Models",
     "keywords": ["laravel", "eloquent", "log"],
     "license": "MIT",
@@ -18,7 +18,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Marquine\\ActivityLog\\": "src/Marquine/ActivityLog/"
+            "Marquine\\Chronos\\": "src/Marquine/Chronos/"
         }
     }
 }

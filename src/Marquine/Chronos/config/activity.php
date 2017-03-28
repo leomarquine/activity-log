@@ -8,7 +8,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | The model for the activities table.
-    | Needs to use the \Marquine\ActivityLog\ActivityLog Trait.
+    | Needs to use the \Marquine\Chronos\ActivityLog Trait.
     */
 
     'model' => App\Activity::class,

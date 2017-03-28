@@ -1,6 +1,6 @@
 <?php
 
-namespace Marquine\ActivityLog\Diff;
+namespace Marquine\Chronos\Diff;
 
 use InvalidArgumentException;
 use Illuminate\Database\Eloquent\Model;

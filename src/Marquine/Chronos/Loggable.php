@@ -1,6 +1,6 @@
 <?php
 
-namespace Marquine\ActivityLog;
+namespace Marquine\Chronos;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 
