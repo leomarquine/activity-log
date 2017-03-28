@@ -30,14 +30,14 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 
     protected function migrateTables()
     {
-        DB::schema()->create('users', function($table) {
+        Capsule::schema()->create('users', function($table) {
             $table->increments('id');
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamps();
         });
 
-        DB::schema()->create('activities', function($table) {
+        Capsule::schema()->create('activities', function($table) {
             $table->increments('id');
             $table->string('loggable_type');
             $table->integer('loggable_id')->unsigned();
