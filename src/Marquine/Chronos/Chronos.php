@@ -30,6 +30,13 @@ class Chronos
     protected $config;
 
     /**
+     * Indicates if logs should be saved.
+     *
+     * @var array
+     */
+    protected $isLogging = true;
+
+    /**
      * Create a new Chronos instance.
      *
      * @param  \Illuminate\Contracts\Events\Dispatcher  $event
@@ -74,11 +81,35 @@ class Chronos
      */
     protected function shouldLog($model)
     {
+        if (! $this->isLogging) {
+            return false;
+        }
+
         if ($model == $this->config['model']) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Pause logging.
+     *
+     * @return void
+     */
+    public function pause()
+    {
+        $this->isLogging = false;
+    }
+
+    /**
+     * Continue logging.
+     *
+     * @return void
+     */
+    public function continue()
+    {
+        $this->isLogging = true;
     }
 
     /**

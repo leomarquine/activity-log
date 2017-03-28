@@ -13,7 +13,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     {
         $event = new Dispatcher(new Container);
 
-        $config = require_once __DIR__ . '/../src/Marquine/Chronos/config/chronos.php';
+        $config = require __DIR__ . '/../src/Marquine/Chronos/config/chronos.php';
 
         $auth = Mockery::mock('Illuminate\Contracts\Auth\Factory');
         $auth->shouldReceive('check')->atLeast()->once()->andReturn(false);
