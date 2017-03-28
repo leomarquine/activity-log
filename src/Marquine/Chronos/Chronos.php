@@ -16,6 +16,13 @@ class Chronos
     protected $event;
 
     /**
+     * The auth instance.
+     *
+     * @var \Illuminate\Contracts\Auth\Factory
+     */
+    protected $auth;
+
+    /**
      * Configuration array.
      *
      * @var array
@@ -29,9 +36,10 @@ class Chronos
      * @param  array  $config
      * @return void
      */
-    public function __construct(Event $event, $config)
+    public function __construct(Event $event, Auth $auth, $config)
     {
         $this->event = $event;
+        $this->auth = $auth;
         $this->config = $config;
 
         $this->registerListeners();
@@ -52,8 +60,25 @@ class Chronos
             list($match, $method, $model) = $match;
             list($instance) = $payload;
 
-            $this->$method($model, $instance);
+            if ($this->shouldLog($model)) {
+                $this->$method($model, $instance);
+            }
         });
+    }
+
+    /**
+     * Determine if the model should be logged.
+     *
+     * @param  string  $model
+     * @return bool
+     */
+    protected function shouldLog($model)
+    {
+        if ($model == $this->config['model']) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -144,7 +169,7 @@ class Chronos
 
         $activity = $this->activityModel();
 
-        $activity->user_id = auth()->check() ? auth()->id() : null;
+        $activity->user_id = $this->getUserId();
         $activity->loggable_id = $instance->getKey();
         $activity->loggable_type = get_class($instance);
         $activity->event = $this->guessEventName($instance);
@@ -164,6 +189,16 @@ class Chronos
         $class = '\\'.ltrim($this->config['model'], '\\');
 
         return new $class;
+    }
+
+    /**
+     * Get the user's id if authenticated.
+     *
+     * @return mixed
+     */
+    protected function getUserId()
+    {
+        return $this->auth->check() ? $this->auth->id() : null;
     }
 
     /**
