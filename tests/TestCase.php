@@ -1,14 +1,24 @@
 <?php
 
+use Marquine\Chronos\Chronos;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 abstract class TestCase extends PHPUnit_Framework_TestCase
 {
+    protected $chronos;
+
     public function setUp()
     {
         $event = new Dispatcher(new Container);
+
+        $config = require_once __DIR__ . '/../src/Marquine/Chronos/config/chronos.php';
+
+        $auth = Mockery::mock('Illuminate\Contracts\Auth\Factory');
+        $auth->shouldReceive('check')->atLeast()->once()->andReturn(false);
+
+        $this->chronos = new Chronos($event, $auth, $config);
 
         $this->setUpDatabase($event);
         $this->migrateTables();
