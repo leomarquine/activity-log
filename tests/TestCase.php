@@ -15,6 +15,10 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 
         $config = require __DIR__ . '/../src/Marquine/Chronos/config/chronos.php';
 
+        $config['loggable'] = [
+            User::class => [],
+        ];
+
         $auth = Mockery::mock('Illuminate\Contracts\Auth\Factory');
         $auth->shouldReceive('check')->atLeast()->once()->andReturn(false);
 
@@ -61,8 +65,17 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     }
 }
 
-class User extends \Illuminate\Database\Eloquent\Model {
-    use \Illuminate\Database\Eloquent\SoftDeletes;
+
+use Marquine\Chronos\Activities;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class User extends Model {
+    use SoftDeletes, Activities;
 
     protected $fillable = ['email', 'name'];
+}
+
+function config() {
+    return Marquine\Chronos\Activity::class;
 }

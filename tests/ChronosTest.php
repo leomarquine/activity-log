@@ -10,7 +10,7 @@ class ChronosTest extends TestCase
     }
 
     /** @test */
-    function log_created_event()
+    function log_activity_after_create_an_eloquent_model()
     {
         $this->createUser();
 
@@ -36,7 +36,7 @@ class ChronosTest extends TestCase
     }
 
     /** @test */
-    function log_updated_event()
+    function log_activity_after_update_an_eloquent_model()
     {
         $this->chronos->pause();
         $user = $this->createUser();
@@ -53,7 +53,7 @@ class ChronosTest extends TestCase
     }
 
     /** @test */
-    function log_deleted_event()
+    function log_activity_after_delete_an_eloquent_model()
     {
         $this->chronos->pause();
         $user = $this->createUser();
@@ -70,7 +70,7 @@ class ChronosTest extends TestCase
     }
 
     /** @test */
-    function log_restored_event()
+    function log_activity_after_restore_an_eloquent_model()
     {
         $this->chronos->pause();
         $user = $this->createUser();
@@ -85,5 +85,15 @@ class ChronosTest extends TestCase
         $this->assertEquals('restored', $activity->event);
         $this->assertNull($activity->before);
         $this->assertEquals(['name' => 'Jane Doe', 'email' => 'janedoe@example.com'], $activity->after);
+    }
+
+    /** @test */
+    function models_have_access_to_its_activities_when_using_the_activities_trait()
+    {
+        $user = $this->createUser();
+
+        $activity = $user->activities->first();
+
+        $this->assertEquals($user->activities->first()->toArray(), Activity::first()->toArray());
     }
 }
