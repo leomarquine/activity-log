@@ -90,6 +90,14 @@ class Chronos
             return false;
         }
 
+        if ($this->config("loggable.$model") === false) {
+            return false;
+        }
+
+        if ($this->config('scope') == 'loggable') {
+            return $this->config("loggable.$model") !== null;
+        }
+
         return true;
     }
 
