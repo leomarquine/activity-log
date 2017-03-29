@@ -3,6 +3,7 @@
 namespace Marquine\Chronos\Diff;
 
 use InvalidArgumentException;
+use Marquine\Chronos\Chronos;
 use Illuminate\Database\Eloquent\Model;
 use cogpowered\FineDiff\Diff as Differ;
 
@@ -20,7 +21,7 @@ class Diff
      *
      * @var \cogpowered\FineDiff\Diff
      */
-    protected $diff;
+    protected $differ;
 
     /**
      * The data before the activity.
@@ -68,22 +69,22 @@ class Diff
      * @param  array  $data
      * @return array
      */
-    protected function data($data)
+    protected function parseData($data)
     {
-        $model = new $this->activity->loggable_type;
+        $instance = new $this->activity->loggable_type;
 
         $data = (array) $data;
 
-        if (! $model->diffRaw()) {
-            $model->unguard();
+        if (! Chronos::config('diff.raw', $this->activity->loggable_type)) {
+            $instance->unguard();
 
-            $data = $model->fill($data)->attributesToArray();
+            $data = $instance->fill($data)->attributesToArray();
 
-            $model->reguard();
+            $instance->reguard();
         }
 
-        if (! config('activity.diff.hidden')) {
-            $data = $this->removeHiddenAttributes($model, $data);
+        if (! Chronos::config('diff.hidden', $this->activity->loggable_type)) {
+            $data = $this->removeHiddenAttributes($instance, $data);
         }
 
         return $data;
@@ -92,13 +93,13 @@ class Diff
     /**
      * Remove model's hidden attributes.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  \Illuminate\Database\Eloquent\Model  $instance
      * @param  array  $data
      * @return array
      */
-    protected function removeHiddenAttributes($model, $data)
+    protected function removeHiddenAttributes($instance, $data)
     {
-        $hidden = $model->getHidden();
+        $hidden = $instance->getHidden();
 
         return array_diff_key($data, array_flip($hidden));
     }
@@ -112,7 +113,7 @@ class Diff
     protected function before($key = null)
     {
         if (! $this->before) {
-            $this->before = $this->data($this->activity->before);
+            $this->before = $this->parseData($this->activity->before);
         }
 
         if (! $key) {
@@ -135,7 +136,7 @@ class Diff
     protected function after($key = null)
     {
         if (! $this->after) {
-            $this->after = $this->data($this->activity->after);
+            $this->after = $this->parseData($this->activity->after);
         }
 
         if (! $key) {
@@ -273,9 +274,7 @@ class Diff
      */
     protected function granularity()
     {
-        $model = new $this->activity->loggable_type;
-
-        $granularity = $model->diffGranularity();
+        $granularity = Chronos::config('diff.granularity', $this->activity->loggable_type);
 
         switch ($granularity) {
             case 'character':
