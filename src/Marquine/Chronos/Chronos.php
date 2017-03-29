@@ -188,7 +188,7 @@ class Chronos
      */
     protected function loggableAttributes($model, $attributes)
     {
-        $except = array_flip($this->config('ignore'));
+        $except = array_flip($this->config('ignore', $model));
 
         return array_diff_key($attributes, $except);
     }
