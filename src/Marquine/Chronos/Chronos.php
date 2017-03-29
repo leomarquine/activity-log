@@ -27,7 +27,7 @@ class Chronos
      *
      * @var array
      */
-    protected $config;
+    protected static $config;
 
     /**
      * Indicates if logs should be saved.
@@ -47,7 +47,8 @@ class Chronos
     {
         $this->event = $event;
         $this->auth = $auth;
-        $this->config = $config;
+
+        static::$config = $config;
 
         $this->registerListeners();
     }
@@ -85,7 +86,7 @@ class Chronos
             return false;
         }
 
-        if ($model == $this->config['model']) {
+        if ($model == $this->config('model')) {
             return false;
         }
 
@@ -179,7 +180,7 @@ class Chronos
      */
     protected function loggableAttributes($model, $attributes)
     {
-        $except = array_flip($this->config['ignore']);
+        $except = array_flip($this->config('ignore'));
 
         return array_diff_key($attributes, $except);
     }
@@ -217,7 +218,7 @@ class Chronos
      */
     protected function activityModel()
     {
-        $class = '\\'.ltrim($this->config['model'], '\\');
+        $class = '\\'.ltrim($this->config('model'), '\\');
 
         return new $class;
     }
@@ -257,5 +258,21 @@ class Chronos
         if ($instance->isDirty()) {
             return 'updated';
         }
+    }
+
+    /**
+     * Get configuration option.
+     *
+     * @param  string  $option
+     * @param  string|null  $model
+     * @return mixed
+     */
+    public static function config($option, $model = null)
+    {
+        if ($result = Arr::get(static::$config, "loggable.$model.$option")) {
+            return $result;
+        }
+
+        return Arr::get(static::$config, $option);
     }
 }
