@@ -2,32 +2,14 @@
 
 namespace Marquine\Chronos;
 
-use Illuminate\Support\Arr;
-use Illuminate\Contracts\Auth\Factory as Auth;
-use Illuminate\Contracts\Events\Dispatcher as Event;
-
 class Chronos
 {
     /**
-     * The event instance.
+     * The application instance.
      *
-     * @var \Illuminate\Contracts\Events\Dispatcher
+     * @var \Illuminate\Foundation\Application
      */
-    protected $event;
-
-    /**
-     * The auth instance.
-     *
-     * @var \Illuminate\Contracts\Auth\Factory
-     */
-    protected $auth;
-
-    /**
-     * Configuration array.
-     *
-     * @var array
-     */
-    protected static $config;
+    protected $app;
 
     /**
      * Indicates if logs should be saved.
@@ -39,16 +21,12 @@ class Chronos
     /**
      * Create a new Chronos instance.
      *
-     * @param  \Illuminate\Contracts\Events\Dispatcher  $event
-     * @param  array  $config
+     * @param  \Illuminate\Foundation\Application|array  $app
      * @return void
      */
-    public function __construct(Event $event, Auth $auth, $config)
+    public function __construct($app)
     {
-        $this->event = $event;
-        $this->auth = $auth;
-
-        static::$config = $config;
+        $this->app = $app;
 
         $this->registerListeners();
     }
@@ -62,7 +40,7 @@ class Chronos
     {
         $events = ['eloquent.created: *', 'eloquent.updated: *', 'eloquent.deleted: *', 'eloquent.restored: *'];
 
-        $this->event->listen($events, function($event, $payload) {
+        $this->app['events']->listen($events, function($event, $payload) {
             preg_match('/(?:\.)(\w+)(?:\:)(?:\s)(.+$)/', $event, $match);
 
             list($match, $method, $model) = $match;
@@ -238,7 +216,7 @@ class Chronos
      */
     protected function getUserId()
     {
-        return $this->auth->check() ? $this->auth->id() : null;
+        return $this->app['auth']->check() ? $this->app['auth']->id() : null;
     }
 
     /**
@@ -275,12 +253,9 @@ class Chronos
      * @param  string|null  $model
      * @return mixed
      */
-    public static function config($option, $model = null)
+    public function config($option, $model = null)
     {
-        if ($result = Arr::get(static::$config, "loggable.$model.$option")) {
-            return $result;
-        }
-
-        return Arr::get(static::$config, $option);
+        return $this->app['config']["chronos.loggable.$model.$option"]
+               ?: $this->app['config']["chronos.$option"];
     }
 }

@@ -11,10 +11,9 @@
     ],
     "require": {
         "cogpowered/finediff": "^0.3.1",
-        "illuminate/support": "^5.0.0",
         "illuminate/database": "^5.0.0",
-        "illuminate/events": "^5.0.0"
-
+        "illuminate/events": "^5.0.0",
+        "illuminate/config": "^5.0.0"
     },
     "autoload": {
         "psr-4": {

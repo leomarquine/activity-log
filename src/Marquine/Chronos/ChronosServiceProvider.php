@@ -18,4 +18,16 @@ class ChronosServiceProvider extends ServiceProvider
             __DIR__.'/migrations/2016_10_01_000000_create_activities_table.php' => database_path('migrations/2016_10_01_000000_create_activities_table.php'),
         ], 'activity-log');
     }
+
+    /**
+     * Register the application services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $chronos = new Chronos($this->app);
+
+        $this->app->instance('Marquine\Chronos\Chronos', $chronos);
+    }
 }

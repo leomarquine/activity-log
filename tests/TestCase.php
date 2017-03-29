@@ -3,32 +3,46 @@
 use Marquine\Chronos\Chronos;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
+use Illuminate\Config\Repository as Config;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 abstract class TestCase extends PHPUnit_Framework_TestCase
 {
+    protected $app;
+
     protected $chronos;
 
     public function setUp()
     {
-        $event = new Dispatcher(new Container);
-
-        $config = require __DIR__ . '/../src/Marquine/Chronos/config/chronos.php';
-
-        $config['loggable'] = [
-            User::class => [],
-        ];
+        $events = new Dispatcher(new Container);
 
         $auth = Mockery::mock('Illuminate\Contracts\Auth\Factory');
         $auth->shouldReceive('check')->atLeast()->once()->andReturn(false);
 
-        $this->chronos = new Chronos($event, $auth, $config);
+        $config = new Config([
+            'chronos' => require __DIR__.'/../src/Marquine/Chronos/config/chronos.php'
+        ]);
 
-        $this->setUpDatabase($event);
+        $config->set('chronos.loggable', [User::class => []]);
+
+        $this->app = [
+            'events' => $events,
+            'auth' => $auth,
+            'config' => $config,
+        ];
+
+        $this->chronos = new Chronos($this->app);
+
+        $this->setUpDatabase($events);
         $this->migrateTables();
     }
 
-    protected function setUpDatabase($event)
+    public function tearDown()
+    {
+        Mockery::close();
+    }
+
+    protected function setUpDatabase($events)
     {
         $capsule = new Capsule;
 
@@ -37,7 +51,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
             'database'  => ':memory:',
         ]);
 
-        $capsule->setEventDispatcher($event);
+        $capsule->setEventDispatcher($events);
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
     }
