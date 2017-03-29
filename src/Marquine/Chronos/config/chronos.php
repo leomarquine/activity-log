@@ -13,6 +13,6 @@ return [
     'ignore' => ['id', 'created_at', 'updated_at', 'deleted_at'],
 
     'loggable' => [
-        User::class => [],
+        App\User::class => [],
     ],
 ];
