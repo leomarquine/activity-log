@@ -4,6 +4,8 @@ return [
 
     'model' => Marquine\Chronos\Activity::class,
 
+    'table' => 'activities',
+
     'diff' => [
         'raw' => true,
         'granularity' => 'word',
