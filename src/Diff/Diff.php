@@ -2,8 +2,8 @@
 
 namespace Marquine\Chronos\Diff;
 
+use Illuminate\Support\Arr;
 use InvalidArgumentException;
-use Marquine\Chronos\Chronos;
 use Illuminate\Database\Eloquent\Model;
 use cogpowered\FineDiff\Diff as Differ;
 
@@ -41,11 +41,14 @@ class Diff
      * Create a new Diff instance.
      *
      * @param  \Illuminate\Database\Eloquent\Model  $activity
+     * @param  array  $config
      * @return void
      */
-    protected function __construct(Model $activity)
+    public function __construct(Model $activity, $config)
     {
         $this->activity = $activity;
+
+        $this->config = $config;
 
         $this->differ = new Differ($this->granularity());
     }
@@ -54,11 +57,12 @@ class Diff
      * Make an activity diff.
      *
      * @param  \Illuminate\Database\Eloquent\Model  $activity
+     * @param  array  $config
      * @return array
      */
-    public static function make($activity)
+    public static function make($activity, $config)
     {
-        $instance = new static($activity);
+        $instance = new static($activity, $config);
 
         return $instance->diff();
     }
@@ -75,7 +79,7 @@ class Diff
 
         $data = (array) $data;
 
-        if (! Chronos::config('diff.raw', $this->activity->model_type)) {
+        if (! $this->config('diff.raw', $this->activity->model_type)) {
             $instance->unguard();
 
             $data = $instance->fill($data)->attributesToArray();
@@ -83,7 +87,7 @@ class Diff
             $instance->reguard();
         }
 
-        if (! Chronos::config('diff.hidden', $this->activity->model_type)) {
+        if (! $this->config('diff.hidden', $this->activity->model_type)) {
             $data = $this->removeHiddenAttributes($instance, $data);
         }
 
@@ -169,7 +173,7 @@ class Diff
      *
      * @return array
      */
-    protected function diff()
+    public function diff()
     {
         $result = [];
 
@@ -274,7 +278,7 @@ class Diff
      */
     protected function granularity()
     {
-        $granularity = Chronos::config('diff.granularity', $this->activity->model_type);
+        $granularity = $this->config('diff.granularity', $this->activity->model_type);
 
         switch ($granularity) {
             case 'character':
@@ -288,5 +292,18 @@ class Diff
         }
 
         throw new InvalidArgumentException("The '$granularity' granularity is not valid.");
+    }
+
+    /**
+     * Get configuration option.
+     *
+     * @param  string  $option
+     * @param  string  $model
+     * @return mixed
+     */
+    protected function config($option, $model)
+    {
+        return Arr::get($this->config, "loggable.$model.$option")
+               ?: Arr::get($this->config, $option);
     }
 }

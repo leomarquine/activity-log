@@ -23,7 +23,7 @@ trait LogActivities
      */
     public function getDiffAttribute()
     {
-        return Diff::make($this);
+        return Diff::make($this, config('chronos'));
     }
 
     /**
