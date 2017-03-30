@@ -253,7 +253,7 @@ class Chronos
      * @param  string|null  $model
      * @return mixed
      */
-    public function config($option, $model = null)
+    protected function config($option, $model = null)
     {
         return $this->app['config']["chronos.loggable.$model.$option"]
                ?: $this->app['config']["chronos.$option"];
