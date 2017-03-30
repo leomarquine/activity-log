@@ -17,6 +17,7 @@ return [
     'scope' => 'loggable',
 
     'loggable' => [
-        App\User::class => [],
+        App\User::class => ['ignore' => ['id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token']],
     ],
+
 ];
