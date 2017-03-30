@@ -2,6 +2,7 @@
 
 namespace Marquine\Chronos;
 
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 
 class ChronosServiceProvider extends ServiceProvider
@@ -34,5 +35,9 @@ class ChronosServiceProvider extends ServiceProvider
         $chronos = new Chronos($this->app);
 
         $this->app->instance('Marquine\Chronos\Chronos', $chronos);
+
+        $this->app->alias(Chronos::class, 'chronos');
+
+        AliasLoader::getInstance()->alias('Chronos', Facades\Chronos::class);
     }
 }
