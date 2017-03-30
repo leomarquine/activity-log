@@ -20,7 +20,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
         $auth->shouldReceive('check')->atLeast()->once()->andReturn(false);
 
         $config = new Config([
-            'chronos' => require __DIR__.'/../src/Marquine/Chronos/config/chronos.php'
+            'chronos' => require __DIR__.'/../config/chronos.php'
         ]);
 
         $config->set('chronos.loggable', [User::class => []]);

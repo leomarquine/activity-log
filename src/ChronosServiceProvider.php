@@ -14,8 +14,8 @@ class ChronosServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/config/activity.php' => config_path('activity.php'),
-        ], 'activity-log');
+            __DIR__.'/../config/chronos.php' => config_path('chronos.php'),
+        ], 'chronos');
 
         if ($this->app->runningInConsole()) {
             $this->commands([
