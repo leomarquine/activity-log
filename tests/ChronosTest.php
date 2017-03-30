@@ -16,8 +16,8 @@ class ChronosTest extends TestCase
 
         $activity = Activity::first();
 
-        $this->assertEquals('User', $activity->loggable_type);
-        $this->assertEquals(1, $activity->loggable_id);
+        $this->assertEquals('User', $activity->model_type);
+        $this->assertEquals(1, $activity->model_id);
         $this->assertEquals('created', $activity->event);
         $this->assertNull($activity->before);
         $this->assertEquals(['name' => 'Jane Doe', 'email' => 'janedoe@example.com'], $activity->after);
@@ -45,8 +45,8 @@ class ChronosTest extends TestCase
 
         $activity = Activity::first();
 
-        $this->assertEquals('User', $activity->loggable_type);
-        $this->assertEquals(1, $activity->loggable_id);
+        $this->assertEquals('User', $activity->model_type);
+        $this->assertEquals(1, $activity->model_id);
         $this->assertEquals('updated', $activity->event);
         $this->assertEquals(['name' => 'Jane Doe', 'email' => 'janedoe@example.com'], $activity->before);
         $this->assertEquals(['name' => 'Jane Doe', 'email' => 'janedoe@email.com'], $activity->after);
@@ -62,8 +62,8 @@ class ChronosTest extends TestCase
 
         $activity = Activity::first();
 
-        $this->assertEquals('User', $activity->loggable_type);
-        $this->assertEquals(1, $activity->loggable_id);
+        $this->assertEquals('User', $activity->model_type);
+        $this->assertEquals(1, $activity->model_id);
         $this->assertEquals('deleted', $activity->event);
         $this->assertEquals(['name' => 'Jane Doe', 'email' => 'janedoe@example.com'], $activity->before);
         $this->assertNull($activity->after);
@@ -80,8 +80,8 @@ class ChronosTest extends TestCase
 
         $activity = Activity::first();
 
-        $this->assertEquals('User', $activity->loggable_type);
-        $this->assertEquals(1, $activity->loggable_id);
+        $this->assertEquals('User', $activity->model_type);
+        $this->assertEquals(1, $activity->model_id);
         $this->assertEquals('restored', $activity->event);
         $this->assertNull($activity->before);
         $this->assertEquals(['name' => 'Jane Doe', 'email' => 'janedoe@example.com'], $activity->after);

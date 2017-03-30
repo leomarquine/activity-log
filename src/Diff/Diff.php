@@ -71,11 +71,11 @@ class Diff
      */
     protected function parseData($data)
     {
-        $instance = new $this->activity->loggable_type;
+        $instance = new $this->activity->model_type;
 
         $data = (array) $data;
 
-        if (! Chronos::config('diff.raw', $this->activity->loggable_type)) {
+        if (! Chronos::config('diff.raw', $this->activity->model_type)) {
             $instance->unguard();
 
             $data = $instance->fill($data)->attributesToArray();
@@ -83,7 +83,7 @@ class Diff
             $instance->reguard();
         }
 
-        if (! Chronos::config('diff.hidden', $this->activity->loggable_type)) {
+        if (! Chronos::config('diff.hidden', $this->activity->model_type)) {
             $data = $this->removeHiddenAttributes($instance, $data);
         }
 
@@ -274,7 +274,7 @@ class Diff
      */
     protected function granularity()
     {
-        $granularity = Chronos::config('diff.granularity', $this->activity->loggable_type);
+        $granularity = Chronos::config('diff.granularity', $this->activity->model_type);
 
         switch ($granularity) {
             case 'character':

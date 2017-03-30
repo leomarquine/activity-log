@@ -15,15 +15,15 @@ class Create{{tableClassName}}Table extends Migration
     {
         Schema::create('{{table}}', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('loggable_type');
-            $table->integer('loggable_id')->unsigned();
             $table->integer('user_id')->unsigned()->nullable();
+            $table->integer('model_id')->unsigned();
+            $table->string('model_type');
             $table->string('event');
             $table->json('before')->nullable();
             $table->json('after')->nullable();
             $table->timestamps();
 
-            $table->index(['loggable_type', 'loggable_id']);
+            $table->index(['model_type', 'model_id']);
         });
     }
 

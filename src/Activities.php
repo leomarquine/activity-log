@@ -11,6 +11,6 @@ trait Activities
      */
     public function activities()
     {
-        return $this->morphMany(config('chronos.model'), 'loggable');
+        return $this->morphMany(config('chronos.model'), 'model');
     }
 }

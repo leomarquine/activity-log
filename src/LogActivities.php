@@ -7,11 +7,11 @@ use Marquine\Chronos\Diff\Diff;
 trait LogActivities
 {
     /**
-     * Get all of the owning loggable models.
+     * Get the activity model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
-    public function loggable()
+    public function model()
     {
         return $this->morphTo();
     }

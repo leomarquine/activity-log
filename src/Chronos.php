@@ -188,8 +188,8 @@ class Chronos
         $activity = $this->activityModel();
 
         $activity->user_id = $this->getUserId();
-        $activity->loggable_id = $instance->getKey();
-        $activity->loggable_type = get_class($instance);
+        $activity->model_id = $instance->getKey();
+        $activity->model_type = get_class($instance);
         $activity->event = $this->guessEventName($instance);
         $activity->before = $before;
         $activity->after = $after;

@@ -68,8 +68,8 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 
         Capsule::schema()->create('activities', function($table) {
             $table->increments('id');
-            $table->string('loggable_type');
-            $table->integer('loggable_id')->unsigned();
+            $table->string('model_type');
+            $table->integer('model_id')->unsigned();
             $table->integer('user_id')->unsigned()->nullable();
             $table->string('event');
             $table->json('before')->nullable();
