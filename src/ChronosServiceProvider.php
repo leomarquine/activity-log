@@ -32,7 +32,7 @@ class ChronosServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $chronos = new Chronos($this->app);
+        $chronos = new Chronos($this->app['events'], $this->app['config']);
 
         $this->app->instance('Marquine\Chronos\Chronos', $chronos);
 

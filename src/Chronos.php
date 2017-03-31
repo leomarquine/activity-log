@@ -2,14 +2,24 @@
 
 namespace Marquine\Chronos;
 
+use Illuminate\Events\Dispatcher;
+use Illuminate\Config\Repository;
+
 class Chronos
 {
     /**
-     * The application instance.
+     * The events instance.
      *
-     * @var \Illuminate\Foundation\Application
+     * @var \Illuminate\Events\Dispatcher
      */
-    protected $app;
+    protected $events;
+
+    /**
+     * The config instance.
+     *
+     * @var \Illuminate\Config\Repository
+     */
+    protected $config;
 
     /**
      * Indicates if logs should be saved.
@@ -21,12 +31,14 @@ class Chronos
     /**
      * Create a new Chronos instance.
      *
-     * @param  \Illuminate\Foundation\Application|array  $app
+     * @param  \Illuminate\Events\Dispatcher  $events
+     * @param  \Illuminate\Config\Repository  $config
      * @return void
      */
-    public function __construct($app)
+    public function __construct(Dispatcher $events, Repository $config)
     {
-        $this->app = $app;
+        $this->events = $events;
+        $this->config = $config;
 
         $this->registerListeners();
     }
@@ -40,7 +52,7 @@ class Chronos
     {
         $events = ['eloquent.created: *', 'eloquent.updated: *', 'eloquent.deleted: *', 'eloquent.restored: *'];
 
-        $this->app['events']->listen($events, function($event, $payload) {
+        $this->events->listen($events, function($event, $payload) {
             preg_match('/(?:\.)(\w+)(?:\:)(?:\s)(.+$)/', $event, $match);
 
             list($match, $method, $model) = $match;
@@ -244,7 +256,7 @@ class Chronos
      */
     protected function config($option, $model = null)
     {
-        return $this->app['config']["chronos.loggable.$model.$option"]
-               ?: $this->app['config']["chronos.$option"];
+        return $this->config["chronos.loggable.$model.$option"]
+               ?: $this->config["chronos.$option"];
     }
 }

@@ -8,8 +8,6 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 abstract class TestCase extends PHPUnit_Framework_TestCase
 {
-    protected $app;
-
     protected $chronos;
 
     public function setUp()
@@ -22,20 +20,10 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 
         $config->set('chronos.loggable', [User::class => []]);
 
-        $this->app = [
-            'events' => $events,
-            'config' => $config,
-        ];
-
-        $this->chronos = new Chronos($this->app);
+        $this->chronos = new Chronos($events, $config);
 
         $this->setUpDatabase($events);
         $this->migrateTables();
-    }
-
-    public function tearDown()
-    {
-        Mockery::close();
     }
 
     protected function setUpDatabase($events)
