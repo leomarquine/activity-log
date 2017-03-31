@@ -16,9 +16,6 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     {
         $events = new Dispatcher(new Container);
 
-        $auth = Mockery::mock('Illuminate\Contracts\Auth\Factory');
-        $auth->shouldReceive('check')->atLeast()->once()->andReturn(false);
-
         $config = new Config([
             'chronos' => require __DIR__.'/../config/chronos.php'
         ]);
@@ -27,7 +24,6 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 
         $this->app = [
             'events' => $events,
-            'auth' => $auth,
             'config' => $config,
         ];
 
@@ -92,4 +88,10 @@ class User extends Model {
 
 function config() {
     return Marquine\Chronos\Activity::class;
+}
+
+function auth() {
+    return new class {
+        public function id() {}
+    };
 }

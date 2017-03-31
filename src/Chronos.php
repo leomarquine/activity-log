@@ -187,7 +187,6 @@ class Chronos
 
         $activity = $this->activityModel();
 
-        $activity->user_id = $this->getUserId();
         $activity->model_id = $instance->getKey();
         $activity->model_type = get_class($instance);
         $activity->event = $this->guessEventName($instance);
@@ -207,16 +206,6 @@ class Chronos
         $class = '\\'.ltrim($this->config('model'), '\\');
 
         return new $class;
-    }
-
-    /**
-     * Get the user's id if authenticated.
-     *
-     * @return mixed
-     */
-    protected function getUserId()
-    {
-        return $this->app['auth']->check() ? $this->app['auth']->id() : null;
     }
 
     /**
