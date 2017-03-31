@@ -1,6 +1,6 @@
 <?php
 
-namespace Marquine\Chronos;
+namespace Marquine\Chronos\Concerns;
 
 trait AssignsUserToActivity
 {

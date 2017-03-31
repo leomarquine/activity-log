@@ -1,10 +1,10 @@
 <?php
 
-namespace Marquine\Chronos;
+namespace Marquine\Chronos\Concerns;
 
 use Marquine\Chronos\Diff\Diff;
 
-trait HasActivities
+trait InteractsWithActivities
 {
     /**
      * Get the activity model.

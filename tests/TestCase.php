@@ -76,12 +76,12 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 }
 
 
-use Marquine\Chronos\Activities;
 use Illuminate\Database\Eloquent\Model;
+use Marquine\Chronos\Concerns\HasActivities;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Model {
-    use SoftDeletes, Activities;
+    use SoftDeletes, HasActivities;
 
     protected $fillable = ['email', 'name'];
 }

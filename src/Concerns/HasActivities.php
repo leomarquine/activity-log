@@ -1,8 +1,8 @@
 <?php
 
-namespace Marquine\Chronos;
+namespace Marquine\Chronos\Concerns;
 
-trait Activities
+trait HasActivities
 {
     /**
      * Get the model's activities.

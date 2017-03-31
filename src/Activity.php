@@ -6,5 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Activity extends Model
 {
-    use HasActivities, AssignsUserToActivity;
+    use Concerns\InteractsWithActivities,
+        Concerns\AssignsUserToActivity;
 }
