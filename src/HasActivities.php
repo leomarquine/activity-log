@@ -4,7 +4,7 @@ namespace Marquine\Chronos;
 
 use Marquine\Chronos\Diff\Diff;
 
-trait LogActivities
+trait HasActivities
 {
     /**
      * Get the activity model.
