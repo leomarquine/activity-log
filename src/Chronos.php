@@ -40,7 +40,7 @@ class Chronos
         $this->events = $events;
         $this->config = $config;
 
-        $this->registerListeners();
+        // $this->registerListeners();
     }
 
     /**
@@ -114,13 +114,12 @@ class Chronos
     /**
      * Log attributes for the "created" event.
      *
-     * @param  string  $model
      * @param  \Illuminate\Database\Eloquent\Model  $instance
      * @return void
      */
-    protected function created($model, $instance)
+    public function created($instance)
     {
-        $after = $this->loggableAttributes($model, $instance->getAttributes());
+        $after = $this->loggableAttributes(get_class($instance), $instance->getAttributes());
 
         $this->log($instance, null, $after);
     }
@@ -128,15 +127,14 @@ class Chronos
     /**
      * Log attributes for the "updated" event.
      *
-     * @param  string  $model
      * @param  \Illuminate\Database\Eloquent\Model  $instance
      * @return void
      */
-    protected function updated($model, $instance)
+    public function updated($instance)
     {
-        $before = $this->loggableAttributes($model, $instance->getOriginal());
+        $before = $this->loggableAttributes(get_class($instance), $instance->getOriginal());
 
-        $after = $this->loggableAttributes($model, $instance->getAttributes());
+        $after = $this->loggableAttributes(get_class($instance), $instance->getAttributes());
 
         $this->log($instance, $before, $after);
     }
@@ -144,13 +142,12 @@ class Chronos
     /**
      * Log attributes for the "deleted" event.
      *
-     * @param  string  $model
      * @param  \Illuminate\Database\Eloquent\Model  $instance
      * @return void
      */
-    protected function deleted($model, $instance)
+    public function deleted($instance)
     {
-        $before = $this->loggableAttributes($model, $instance->getAttributes());
+        $before = $this->loggableAttributes(get_class($instance), $instance->getAttributes());
 
         $this->log($instance, $before, null);
     }
@@ -158,13 +155,12 @@ class Chronos
     /**
      * Log attributes for the "restored" event.
      *
-     * @param  string  $model
      * @param  \Illuminate\Database\Eloquent\Model  $instance
      * @return void
      */
-    protected function restored($model, $instance)
+    public function restored($instance)
     {
-        $after = $this->loggableAttributes($model, $instance->getAttributes());
+        $after = $this->loggableAttributes(get_class($instance), $instance->getAttributes());
 
         $this->log($instance, null, $after);
     }
@@ -193,7 +189,7 @@ class Chronos
      */
     public function log($instance, $before, $after)
     {
-        if ($before == $after) {
+        if ($before == $after || ! $this->isLogging) {
             return;
         }
 

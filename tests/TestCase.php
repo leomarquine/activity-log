@@ -38,6 +38,9 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
         $capsule->setEventDispatcher($events);
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
+
+        User::flushEventListeners();
+        User::boot();
     }
 
     protected function migrateTables()
@@ -65,11 +68,11 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 
 
 use Illuminate\Database\Eloquent\Model;
-use Marquine\Chronos\Concerns\HasActivities;
+use Marquine\Chronos\Concerns\RecordsActivities;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Model {
-    use SoftDeletes, HasActivities;
+    use SoftDeletes, RecordsActivities;
 
     protected $fillable = ['email', 'name'];
 }
@@ -82,4 +85,19 @@ function auth() {
     return new class {
         public function id() {}
     };
+}
+
+
+function app() {
+    static $chronos;
+
+    $events = new Dispatcher(new Container);
+
+    $config = new Config([
+        'chronos' => require __DIR__.'/../config/chronos.php'
+    ]);
+
+    $config->set('chronos.loggable', [User::class => []]);
+
+    return $chronos = $chronos ?: new Chronos($events, $config);
 }

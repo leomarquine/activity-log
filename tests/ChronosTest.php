@@ -10,7 +10,7 @@ class ChronosTest extends TestCase
     }
 
     /** @test */
-    function log_activity_after_create_an_eloquent_model()
+    function records_activity_when_creating_an_eloquent_model()
     {
         $this->createUser();
 
@@ -27,20 +27,20 @@ class ChronosTest extends TestCase
     function pause_and_continue_log_registration()
     {
         $this->createUser();
-        $this->chronos->pause();
+        app('chronos')->pause();
         $this->createUser();
-        $this->chronos->continue();
+        app('chronos')->continue();
         $this->createUser();
 
         $this->assertEquals(2, Activity::count());
     }
 
     /** @test */
-    function log_activity_after_update_an_eloquent_model()
+    function records_activity_when_updating_an_eloquent_model()
     {
-        $this->chronos->pause();
+        app('chronos')->pause();
         $user = $this->createUser();
-        $this->chronos->continue();
+        app('chronos')->continue();
         $user->update(['email' => 'janedoe@email.com']);
 
         $activity = Activity::first();
@@ -53,11 +53,11 @@ class ChronosTest extends TestCase
     }
 
     /** @test */
-    function log_activity_after_delete_an_eloquent_model()
+    function records_activity_when_deleting_an_eloquent_model()
     {
-        $this->chronos->pause();
+        app('chronos')->pause();
         $user = $this->createUser();
-        $this->chronos->continue();
+        app('chronos')->continue();
         $user->delete();
 
         $activity = Activity::first();
@@ -70,12 +70,12 @@ class ChronosTest extends TestCase
     }
 
     /** @test */
-    function log_activity_after_restore_an_eloquent_model()
+    function records_activity_when_restoring_an_eloquent_model()
     {
-        $this->chronos->pause();
+        app('chronos')->pause();
         $user = $this->createUser();
         $user->delete();
-        $this->chronos->continue();
+        app('chronos')->continue();
         $user->restore();
 
         $activity = Activity::first();
@@ -85,15 +85,5 @@ class ChronosTest extends TestCase
         $this->assertEquals('restored', $activity->event);
         $this->assertNull($activity->before);
         $this->assertEquals(['name' => 'Jane Doe', 'email' => 'janedoe@example.com'], $activity->after);
-    }
-
-    /** @test */
-    function models_have_access_to_its_activities_when_using_the_activities_trait()
-    {
-        $user = $this->createUser();
-
-        $activity = $user->activities->first();
-
-        $this->assertEquals($user->activities->first()->toArray(), Activity::first()->toArray());
     }
 }
