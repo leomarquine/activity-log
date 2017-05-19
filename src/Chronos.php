@@ -8,13 +8,6 @@ use Illuminate\Config\Repository;
 class Chronos
 {
     /**
-     * The events instance.
-     *
-     * @var \Illuminate\Events\Dispatcher
-     */
-    protected $events;
-
-    /**
      * The config instance.
      *
      * @var \Illuminate\Config\Repository
@@ -31,64 +24,12 @@ class Chronos
     /**
      * Create a new Chronos instance.
      *
-     * @param  \Illuminate\Events\Dispatcher  $events
      * @param  \Illuminate\Config\Repository  $config
      * @return void
      */
-    public function __construct(Dispatcher $events, Repository $config)
+    public function __construct(Repository $config)
     {
-        $this->events = $events;
         $this->config = $config;
-
-        // $this->registerListeners();
-    }
-
-    /**
-     * Register eloquent event listeners.
-     *
-     * @return void
-     */
-    protected function registerListeners()
-    {
-        $events = ['eloquent.created: *', 'eloquent.updated: *', 'eloquent.deleted: *', 'eloquent.restored: *'];
-
-        $this->events->listen($events, function($event, $payload) {
-            preg_match('/(?:\.)(\w+)(?:\:)(?:\s)(.+$)/', $event, $match);
-
-            list($match, $method, $model) = $match;
-            list($instance) = $payload;
-
-            if ($this->shouldLog($model)) {
-                $this->$method($model, $instance);
-            }
-        });
-    }
-
-    /**
-     * Determine if the model should be logged.
-     *
-     * @param  string  $model
-     * @return bool
-     */
-    protected function shouldLog($model)
-    {
-        if (! $this->isLogging) {
-            return false;
-        }
-
-        if ($model == $this->config('model')) {
-            return false;
-        }
-
-        if ($this->config("loggable.$model") === false) {
-            return false;
-        }
-
-        if ($this->config('scope') == 'loggable') {
-            return $this->config("loggable.$model") !== null;
-        }
-
-        return true;
     }
 
     /**

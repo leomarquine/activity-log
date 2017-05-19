@@ -8,25 +8,15 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 abstract class TestCase extends PHPUnit_Framework_TestCase
 {
-    protected $chronos;
-
     public function setUp()
     {
-        $events = new Dispatcher(new Container);
+        parent::setUp();
 
-        $config = new Config([
-            'chronos' => require __DIR__.'/../config/chronos.php'
-        ]);
-
-        $config->set('chronos.loggable', [User::class => []]);
-
-        $this->chronos = new Chronos($events, $config);
-
-        $this->setUpDatabase($events);
+        $this->setUpDatabase();
         $this->migrateTables();
     }
 
-    protected function setUpDatabase($events)
+    protected function setUpDatabase()
     {
         $capsule = new Capsule;
 
@@ -35,7 +25,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
             'database'  => ':memory:',
         ]);
 
-        $capsule->setEventDispatcher($events);
+        $capsule->setEventDispatcher(new Dispatcher(new Container));
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
 
@@ -91,13 +81,11 @@ function auth() {
 function app() {
     static $chronos;
 
-    $events = new Dispatcher(new Container);
-
     $config = new Config([
         'chronos' => require __DIR__.'/../config/chronos.php'
     ]);
 
     $config->set('chronos.loggable', [User::class => []]);
 
-    return $chronos = $chronos ?: new Chronos($events, $config);
+    return $chronos = $chronos ?: new Chronos($config);
 }
