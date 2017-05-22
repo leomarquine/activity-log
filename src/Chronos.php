@@ -2,7 +2,6 @@
 
 namespace Marquine\Chronos;
 
-use Illuminate\Events\Dispatcher;
 use Illuminate\Config\Repository;
 
 class Chronos
