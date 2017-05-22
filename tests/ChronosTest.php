@@ -2,6 +2,8 @@
 
 use Marquine\Chronos\Activity;
 
+use Marquine\Chronos\Facades\Chronos;
+
 class ChronosTest extends TestCase
 {
     protected function createUser()
@@ -27,9 +29,9 @@ class ChronosTest extends TestCase
     function pause_and_continue_log_registration()
     {
         $this->createUser();
-        app('chronos')->pause();
+        Chronos::pause();
         $this->createUser();
-        app('chronos')->continue();
+        Chronos::continue();
         $this->createUser();
 
         $this->assertEquals(2, Activity::count());
@@ -38,9 +40,9 @@ class ChronosTest extends TestCase
     /** @test */
     function records_activity_when_updating_an_eloquent_model()
     {
-        app('chronos')->pause();
+        Chronos::pause();
         $user = $this->createUser();
-        app('chronos')->continue();
+        Chronos::continue();
         $user->update(['email' => 'janedoe@email.com']);
 
         $activity = Activity::first();
@@ -55,9 +57,9 @@ class ChronosTest extends TestCase
     /** @test */
     function records_activity_when_deleting_an_eloquent_model()
     {
-        app('chronos')->pause();
+        Chronos::pause();
         $user = $this->createUser();
-        app('chronos')->continue();
+        Chronos::continue();
         $user->delete();
 
         $activity = Activity::first();
@@ -72,10 +74,10 @@ class ChronosTest extends TestCase
     /** @test */
     function records_activity_when_restoring_an_eloquent_model()
     {
-        app('chronos')->pause();
+        Chronos::pause();
         $user = $this->createUser();
         $user->delete();
-        app('chronos')->continue();
+        Chronos::continue();
         $user->restore();
 
         $activity = Activity::first();

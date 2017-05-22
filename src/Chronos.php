@@ -15,11 +15,11 @@ class Chronos
     protected $config;
 
     /**
-     * Indicates if logs should be saved.
+     * Indicates if activity recording is paused.
      *
-     * @var array
+     * @var bool
      */
-    protected $isLogging = true;
+    protected $paused = false;
 
     /**
      * Create a new Chronos instance.
@@ -33,87 +33,107 @@ class Chronos
     }
 
     /**
-     * Pause logging.
+     * Pause recording.
      *
      * @return void
      */
     public function pause()
     {
-        $this->isLogging = false;
+        $this->paused = true;
     }
 
     /**
-     * Continue logging.
+     * Continue recording.
      *
      * @return void
      */
     public function continue()
     {
-        $this->isLogging = true;
+        $this->paused = false;
     }
 
     /**
-     * Log attributes for the "created" event.
+     * Indicates if activity recording is paused.
+     *
+     * @return bool
+     */
+    public function paused()
+    {
+        return $this->paused;
+    }
+
+    /**
+     * Get the activity model name.
+     *
+     * @return string
+     */
+    public function model()
+    {
+        return $this->config('model');
+    }
+
+    /**
+     * Record activity for the "created" event.
      *
      * @param  \Illuminate\Database\Eloquent\Model  $instance
      * @return void
      */
     public function created($instance)
     {
-        $after = $this->loggableAttributes(get_class($instance), $instance->getAttributes());
+        $after = $this->recordableAttributes(get_class($instance), $instance->getAttributes());
 
-        $this->log($instance, null, $after);
+        $instance->recordActivity('created', null, $after);
     }
 
     /**
-     * Log attributes for the "updated" event.
+     * Record activity for the "updated" event.
      *
      * @param  \Illuminate\Database\Eloquent\Model  $instance
      * @return void
      */
     public function updated($instance)
     {
-        $before = $this->loggableAttributes(get_class($instance), $instance->getOriginal());
+        $before = $this->recordableAttributes(get_class($instance), $instance->getOriginal());
 
-        $after = $this->loggableAttributes(get_class($instance), $instance->getAttributes());
+        $after = $this->recordableAttributes(get_class($instance), $instance->getAttributes());
 
-        $this->log($instance, $before, $after);
+        $instance->recordActivity('updated', $before, $after);
     }
 
     /**
-     * Log attributes for the "deleted" event.
+     * Record activity for the "deleted" event.
      *
      * @param  \Illuminate\Database\Eloquent\Model  $instance
      * @return void
      */
     public function deleted($instance)
     {
-        $before = $this->loggableAttributes(get_class($instance), $instance->getAttributes());
+        $before = $this->recordableAttributes(get_class($instance), $instance->getAttributes());
 
-        $this->log($instance, $before, null);
+        $instance->recordActivity('deleted', $before, null);
     }
 
     /**
-     * Log attributes for the "restored" event.
+     * Record activity for the "restored" event.
      *
      * @param  \Illuminate\Database\Eloquent\Model  $instance
      * @return void
      */
     public function restored($instance)
     {
-        $after = $this->loggableAttributes(get_class($instance), $instance->getAttributes());
+        $after = $this->recordableAttributes(get_class($instance), $instance->getAttributes());
 
-        $this->log($instance, null, $after);
+        $instance->recordActivity('restored', null, $after);
     }
 
     /**
-     * Filter model's loggable attributes.
+     * Filter model's recordable attributes.
      *
      * @param  string  $model
      * @param  array  $attributes
      * @return array
      */
-    protected function loggableAttributes($model, $attributes)
+    protected function recordableAttributes($model, $attributes)
     {
         $except = array_flip($this->config('ignore', $model));
 
@@ -121,66 +141,19 @@ class Chronos
     }
 
     /**
-     * Save the activity log.
+     * Register model event listeners.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $instance
-     * @param  array|null  $before
-     * @param  array|null  $after
+     * @param  string  $model
      * @return void
      */
-    public function log($instance, $before, $after)
+    public function registerEventListeners($model)
     {
-        if ($before == $after || ! $this->isLogging) {
-            return;
-        }
+        $activities = $this->config('activities', $model);
 
-        $activity = $this->activityModel();
-
-        $activity->model_id = $instance->getKey();
-        $activity->model_type = get_class($instance);
-        $activity->event = $this->guessEventName($instance);
-        $activity->before = $before;
-        $activity->after = $after;
-
-        $activity->save();
-    }
-
-    /**
-     * Create a new instance of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Model
-     */
-    protected function activityModel()
-    {
-        $class = '\\'.ltrim($this->config('model'), '\\');
-
-        return new $class;
-    }
-
-    /**
-     * Guesses the event's name.
-     *
-     * @param  \Illuminate\Database\Eloquent\Model  $instance
-     * @return string
-     */
-    protected function guessEventName($instance)
-    {
-        $caller = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[2];
-
-        if ($caller['class'] == get_class($this)) {
-            return $caller['function'];
-        }
-
-        if ($instance->wasRecentlyCreated) {
-            return 'created';
-        }
-
-        if (! $instance->exists) {
-            return 'deleted';
-        }
-
-        if ($instance->isDirty()) {
-            return 'updated';
+        foreach ($activities as $activity) {
+            call_user_func("$model::$activity", function ($instance) use ($activity) {
+                $this->{$activity}($instance);
+            });
         }
     }
 

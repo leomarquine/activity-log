@@ -6,6 +6,8 @@ return [
 
     'table' => 'activities',
 
+    'activities' => ['created', 'updated', 'deleted', 'restored'],
+
     'diff' => [
         'raw' => true,
         'granularity' => 'word',

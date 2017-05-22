@@ -38,4 +38,18 @@ trait InteractsWithActivities
 
         return parent::getCasts();
     }
+
+    /**
+     * Get the fillable attributes for the model.
+     *
+     * @return array
+     */
+    public function getFillable()
+    {
+        $this->fillable = array_merge(
+            $this->fillable, ['event', 'before', 'after']
+        );
+
+        return $this->fillable;
+    }
 }

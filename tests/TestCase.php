@@ -3,6 +3,7 @@
 use Marquine\Chronos\Chronos;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
@@ -11,6 +12,18 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         parent::setUp();
+
+        $app = new Container;
+
+        $app->singleton('config', Config::class);
+
+        $app['config']->set('chronos', require __DIR__.'/../config/chronos.php');
+
+        $app->singleton('chronos', function ($app) {
+            return new Chronos($app['config']);
+        });
+
+        Facade::setFacadeApplication($app);
 
         $this->setUpDatabase();
         $this->migrateTables();
@@ -58,7 +71,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 
 
 use Illuminate\Database\Eloquent\Model;
-use Marquine\Chronos\Concerns\RecordsActivities;
+use Marquine\Chronos\RecordsActivities;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Model {
@@ -67,25 +80,8 @@ class User extends Model {
     protected $fillable = ['email', 'name'];
 }
 
-function config() {
-    return Marquine\Chronos\Activity::class;
-}
-
 function auth() {
     return new class {
         public function id() {}
     };
-}
-
-
-function app() {
-    static $chronos;
-
-    $config = new Config([
-        'chronos' => require __DIR__.'/../config/chronos.php'
-    ]);
-
-    $config->set('chronos.loggable', [User::class => []]);
-
-    return $chronos = $chronos ?: new Chronos($config);
 }
