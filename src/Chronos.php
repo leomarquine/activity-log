@@ -166,7 +166,20 @@ class Chronos
      */
     protected function config($option, $model = null)
     {
-        return $this->config["chronos.loggable.$model.$option"]
-               ?: $this->config["chronos.$option"];
+        if ($value = $this->config["chronos.override.$model.$option"]) {
+            return $value;
+        }
+
+        $value = $this->config["chronos.merge.$model.$option"];
+
+        if (is_array($value)) {
+            return array_merge($this->config["chronos.$option"], $value);
+        }
+
+        if (is_null($value)) {
+            return $this->config["chronos.$option"];
+        }
+
+        return $value;
     }
 }

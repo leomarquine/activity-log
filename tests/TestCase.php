@@ -9,21 +9,23 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 abstract class TestCase extends PHPUnit_Framework_TestCase
 {
+    protected $app;
+
     public function setUp()
     {
         parent::setUp();
 
-        $app = new Container;
+        $this->app = new Container;
 
-        $app->singleton('config', Config::class);
+        $this->app->singleton('config', Config::class);
 
-        $app['config']->set('chronos', require __DIR__.'/../config/chronos.php');
+        $this->app['config']->set('chronos', require __DIR__.'/../config/chronos.php');
 
-        $app->singleton('chronos', function ($app) {
+        $this->app->singleton('chronos', function ($app) {
             return new Chronos($app['config']);
         });
 
-        Facade::setFacadeApplication($app);
+        Facade::setFacadeApplication($this->app);
 
         $this->setUpDatabase();
         $this->migrateTables();
